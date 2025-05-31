@@ -12,9 +12,9 @@ import (
 func RateLimitMiddleware(l *limiter.Limiter) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			key := getIPFromRequest(r)
+			ip := getIPFromRequest(r)
 			token := getTokenFromRequest(r)
-			if !l.AllowRequest(key, token) {
+			if !l.AllowRequest(ip, token) {
 				http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
 				return
 			}

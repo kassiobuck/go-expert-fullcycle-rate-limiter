@@ -2,7 +2,6 @@ package limiter
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
@@ -15,24 +14,22 @@ type Limiter struct {
 	IPBlockDurationSeconds    int
 	TokenMaxRequestsPerSecond int
 	TokenBlockDurationSeconds int
-	IP                        storage.Store
-	Token                     storage.Store
+	store                     storage.Store
 	ctx                       context.Context
 }
 
-func NewLimiter(ctx context.Context, cfg config.RateLimiterConfig, ip storage.Store, token storage.Store) *Limiter {
+func NewLimiter(ctx context.Context, cfg config.RateLimiterConfig, store storage.Store) *Limiter {
 	return &Limiter{
 		IPMaxRequestsPerSecond:    cfg.IpMaxRequest,
 		IPBlockDurationSeconds:    cfg.IpBlockDuration,
 		TokenMaxRequestsPerSecond: cfg.TokenMaxRequest,
 		TokenBlockDurationSeconds: cfg.TokenBlockDuration,
-		IP:                        ip,
-		Token:                     token,
+		store:                     store,
 		ctx:                       ctx,
 	}
 }
 
-func (l *Limiter) AllowRequest(ip, token string) bool {
+func (l *Limiter) AllowRequest(ip string, token string) bool {
 	if token != "" {
 		return l.isAllowedByToken(token)
 	}
@@ -40,24 +37,26 @@ func (l *Limiter) AllowRequest(ip, token string) bool {
 }
 
 func (l *Limiter) isAllowedByIP(ip string) bool {
-	key := "[ip]" + ip
-	return l.isAllowed(key, l.IPMaxRequestsPerSecond, l.IPBlockDurationSeconds, l.IP)
+	key := "[ip] " + ip
+	return l.isAllowed(key, l.IPMaxRequestsPerSecond, l.IPBlockDurationSeconds, l.store)
 }
 
 func (l *Limiter) isAllowedByToken(token string) bool {
 	key := "[token] " + token
-	return l.isAllowed(key, l.TokenMaxRequestsPerSecond, l.TokenBlockDurationSeconds, l.Token)
+	return l.isAllowed(key, l.TokenMaxRequestsPerSecond, l.TokenBlockDurationSeconds, l.store)
 }
 
 func (l *Limiter) isAllowed(key string, maxRequestsPerSecond, blockDurationSeconds int, store storage.Store) bool {
 	countStr, err := store.Get(l.ctx, key)
 	if err != nil {
+		println(err.Error())
 		return false
 	}
 
 	count, _ := strconv.Atoi(countStr)
+	println(count, maxRequestsPerSecond)
 	if count >= maxRequestsPerSecond {
-		log.Printf("Rate limit exceeded for key: %s", key)
+		println("Rate limit exceeded for key: %s", key)
 		return false
 	}
 

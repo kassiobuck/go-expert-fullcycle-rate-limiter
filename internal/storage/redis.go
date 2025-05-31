@@ -12,7 +12,6 @@ import (
 type RedisStore struct {
 	Store
 	client *redis.Client
-	prefix string
 }
 
 // NewRedisStore creates a new RedisStore.
@@ -24,13 +23,12 @@ func NewRedisStore(cfg config.RedisConfig) *RedisStore {
 	})
 	return &RedisStore{
 		client: rdb,
-		prefix: cfg.Prefix,
 	}
 }
 
 // Get returns the current value and TTL for a given key.
 func (s *RedisStore) Get(ctx context.Context, key string) (string, error) {
-	result, err := s.client.Get(ctx, s.prefix+key).Result()
+	result, err := s.client.Get(ctx, key).Result()
 	if err == redis.Nil {
 		return "", nil
 	} else if err != nil {
@@ -42,7 +40,7 @@ func (s *RedisStore) Get(ctx context.Context, key string) (string, error) {
 // Set sets the value and expiration for a given key.
 func (s *RedisStore) Set(ctx context.Context, key string, value string, expiration time.Duration) error {
 	if expiration <= 0 {
-		return s.client.Set(ctx, s.prefix+key, value, 0).Err()
+		return s.client.Set(ctx, key, value, 0).Err()
 	}
 	return nil
 }
@@ -53,6 +51,5 @@ func (s *RedisStore) Incr(ctx context.Context, key string) error {
 }
 
 func (s *RedisStore) Expire(ctx context.Context, key string, expiration time.Duration) error {
-	err := s.client.Expire(ctx, s.prefix+key, expiration).Err()
-	return err
+	return s.client.Expire(ctx, key, expiration).Err()
 }

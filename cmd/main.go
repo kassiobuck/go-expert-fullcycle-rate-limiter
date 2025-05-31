@@ -15,10 +15,9 @@ func main() {
 
 	cfg := config.LoadConfig()
 	ctx := context.Background()
-	tokenStore := storage.NewRedisStore(cfg.Redis)
-	ipStore := storage.NewRedisStore(cfg.Redis)
+	store := storage.NewRedisStore(cfg.Redis)
 
-	rateLimiter := limiter.NewLimiter(ctx, cfg.RateLimiter, ipStore, tokenStore)
+	rateLimiter := limiter.NewLimiter(ctx, cfg.RateLimiter, store)
 
 	mux := http.NewServeMux()
 

@@ -45,22 +45,22 @@ func LoadConfig() *Config {
 
 	iPmaxRequest, err := strconv.Atoi(getEnv("IP_MAX_REQUESTS_PER_SECOND", "10"))
 	if err != nil {
-		iPmaxRequest = 0
+		iPmaxRequest = 10
 	}
 
 	iPblockDuration, err := strconv.Atoi(getEnv("IP_BLOCK_DURATION", "60"))
 	if err != nil {
-		iPblockDuration = 0
+		iPblockDuration = 60
 	}
 
 	tokenMaxRequest, err := strconv.Atoi(getEnv("TOKEN_MAX_REQUESTS_PER_SECOND", "10"))
 	if err != nil {
-		tokenMaxRequest = 0
+		tokenMaxRequest = 10
 	}
 
 	tokenBlockDuration, err := strconv.Atoi(getEnv("TOKEN_BLOCK_DURATION", "3000"))
 	if err != nil {
-		tokenBlockDuration = 0
+		tokenBlockDuration = 3000
 	}
 
 	return &Config{

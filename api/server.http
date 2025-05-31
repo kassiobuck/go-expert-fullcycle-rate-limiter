@@ -1,3 +1,7 @@
 ### Request Default
 GET http://localhost:8080
-API_KEY:aaa
+
+
+### Request API_KEY
+GET http://localhost:8080
+API_KEY:aab4
