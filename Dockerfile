@@ -16,6 +16,7 @@ RUN go build -o main ./cmd
 # Use a minimal image for running
 FROM alpine:3.19
 
+
 WORKDIR /app
 
 # Copy the built binary from builder

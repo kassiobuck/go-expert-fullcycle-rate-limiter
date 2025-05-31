@@ -1,23 +1,35 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/kassiobuck/go-expert-fullcycle-rate-limiter/config"
+	"github.com/kassiobuck/go-expert-fullcycle-rate-limiter/internal"
+	"github.com/kassiobuck/go-expert-fullcycle-rate-limiter/internal/limiter"
+	"github.com/kassiobuck/go-expert-fullcycle-rate-limiter/internal/storage"
 )
 
 func main() {
+
+	cfg := config.LoadConfig()
+	ctx := context.Background()
+	tokenStore := storage.NewRedisStore(cfg.Redis)
+	ipStore := storage.NewRedisStore(cfg.Redis)
+
+	rateLimiter := limiter.NewLimiter(ctx, cfg.RateLimiter, ipStore, tokenStore)
+
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Welcome to the server!")
-	})
+	middleware := internal.RateLimitMiddleware(rateLimiter)
 
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Server is healthy!")
-	})
+	mux.Handle("/", middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, World!"))
+	})))
 
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + cfg.Server.Port,
 		Handler: mux,
 	}
 
