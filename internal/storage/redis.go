@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -27,18 +28,22 @@ func NewRedisStore(cfg config.RedisConfig) *RedisStore {
 }
 
 // Get returns the current value and TTL for a given key.
-func (s *RedisStore) Get(ctx context.Context, key string) (string, error) {
+func (s *RedisStore) Get(ctx context.Context, key string) (int64, error) {
 	result, err := s.client.Get(ctx, key).Result()
 	if err == redis.Nil {
-		return "", nil
+		return 0, nil
 	} else if err != nil {
-		return "", err
+		return 0, err
 	}
-	return result, nil
+	val, err := strconv.ParseInt(result, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return val, nil
 }
 
 // Set sets the value and expiration for a given key.
-func (s *RedisStore) Set(ctx context.Context, key string, value string, expiration time.Duration) error {
+func (s *RedisStore) Set(ctx context.Context, key string, value int64, expiration time.Duration) error {
 	if expiration <= 0 {
 		return s.client.Set(ctx, key, value, 0).Err()
 	}

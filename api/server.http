@@ -1,7 +1,13 @@
 ### Request Default
 GET http://localhost:8080
 
-
 ### Request API_KEY
 GET http://localhost:8080
-API_KEY:aab4
+API_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtYXhfYWNjZXNzIjoyLCJ3aW5kb3dfYWNjZXNzIjoxLCJpbnRlcnZhbF9hY2Nlc3MiOjEwLCJzdWIiOiJfZ2VuZXJpYyIsImV4cCI6MTc0OTQ0Mjc3OCwiaWF0IjoxNzQ4ODQyODM4fQ.zL2OXrbFCcEyqpwddyy5Y0pwTGoGNSHIL17pjwbcVqI
+
+### generate api key/token
+GET http://localhost:8080/genToken?interval=10&max=2
+
+### decode api key/token
+GET http://localhost:8080/decodeToken
+API_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtYXhfYWNjZXNzIjoyLCJ3aW5kb3dfYWNjZXNzIjoxLCJpbnRlcnZhbF9hY2Nlc3MiOjEwLCJzdWIiOiJfZ2VuZXJpYyIsImV4cCI6MTc0OTQ0Mjc3OCwiaWF0IjoxNzQ4ODQyODM4fQ.zL2OXrbFCcEyqpwddyy5Y0pwTGoGNSHIL17pjwbcVqI

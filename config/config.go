@@ -9,10 +9,8 @@ import (
 )
 
 type RateLimiterConfig struct {
-	IpMaxRequest       int
-	IpBlockDuration    int
-	TokenMaxRequest    int
-	TokenBlockDuration int
+	IpMaxRequest    int64
+	IpBlockDuration int64
 }
 type RedisConfig struct {
 	Port     string
@@ -26,10 +24,15 @@ type ServerConfig struct {
 	Port string
 }
 
+type AuthConfig struct {
+	JwtSecret string
+}
+
 type Config struct {
 	Redis       RedisConfig
 	Server      ServerConfig
 	RateLimiter RateLimiterConfig
+	Auth        AuthConfig
 }
 
 func LoadConfig() *Config {
@@ -43,24 +46,14 @@ func LoadConfig() *Config {
 		redisDB = 0
 	}
 
-	iPmaxRequest, err := strconv.Atoi(getEnv("IP_MAX_REQUESTS_PER_SECOND", "10"))
+	iPmaxRequest, err := strconv.ParseInt(getEnv("IP_MAX_REQUESTS_PER_SECOND", "10"), 10, 64)
 	if err != nil {
 		iPmaxRequest = 10
 	}
 
-	iPblockDuration, err := strconv.Atoi(getEnv("IP_BLOCK_DURATION", "60"))
+	iPblockDuration, err := strconv.ParseInt(getEnv("IP_BLOCK_DURATION", "60"), 10, 64)
 	if err != nil {
 		iPblockDuration = 60
-	}
-
-	tokenMaxRequest, err := strconv.Atoi(getEnv("TOKEN_MAX_REQUESTS_PER_SECOND", "10"))
-	if err != nil {
-		tokenMaxRequest = 10
-	}
-
-	tokenBlockDuration, err := strconv.Atoi(getEnv("TOKEN_BLOCK_DURATION", "3000"))
-	if err != nil {
-		tokenBlockDuration = 3000
 	}
 
 	return &Config{
@@ -75,10 +68,11 @@ func LoadConfig() *Config {
 			Port: getEnv("SERVER_PORT", "8080"),
 		},
 		RateLimiter: RateLimiterConfig{
-			IpMaxRequest:       iPmaxRequest,
-			IpBlockDuration:    iPblockDuration,
-			TokenMaxRequest:    tokenMaxRequest,
-			TokenBlockDuration: tokenBlockDuration,
+			IpMaxRequest:    iPmaxRequest,
+			IpBlockDuration: iPblockDuration,
+		},
+		Auth: AuthConfig{
+			JwtSecret: getEnv("JWT_SECRET_KEY", "defaultsecret"),
 		},
 	}
 }
